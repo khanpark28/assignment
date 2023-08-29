@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('item_name');
             $table->integer('count');
             $table->integer('price');
+            $table->text('currency');
             $table->boolean('read')->default(false);
             $table->timestamps();
         });

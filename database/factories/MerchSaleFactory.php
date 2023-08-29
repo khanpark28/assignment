@@ -23,6 +23,7 @@ class MerchSaleFactory extends Factory
             'item_name' => $this->faker->randomElement(['fancy pants', 'pen', 'hat','book', 'shirts', 'gloves', 'muffler']),
             'count' => $this->faker->numberBetween($min = 1, $max = 100),
             'price' => $this->faker->numberBetween($min = 10, $max = 500),
+            'currency' => 'CAD',
             'created_at' => $fake_date,
             'updated_at' => $fake_date,
         ];

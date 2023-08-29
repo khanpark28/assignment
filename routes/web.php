@@ -14,5 +14,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('list');
 });
+
+Route::get('/message', [\App\Http\Controllers\EventController::class, "getMessage"]);
+
