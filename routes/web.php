@@ -18,4 +18,6 @@ Route::get('/', function () {
 });
 
 Route::get('/message', [\App\Http\Controllers\EventController::class, "getMessage"]);
-
+Route::get('/revenue', [\App\Http\Controllers\EventController::class, "getRevenue"]);
+Route::get('/followerNumber', [\App\Http\Controllers\EventController::class, "getFollowerNumber"]);
+Route::get('/top3bestSale', [\App\Http\Controllers\EventController::class, "getTop3BestSale"]);

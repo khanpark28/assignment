@@ -5,7 +5,17 @@
     <body>
         <h1>Stream Events</h1>
 
-        <input type='button' id='btnGetMessage' value='GET'/>
+        <h3>Total Revenue in the past 30 days </h3>
+        <label>Donation</label> : <label id="donation"></label><br>
+        <label>Merch Sale</label> : <label id="merch_sale"></label><br>
+        <label>Subscriber</label> : <label id="subscriber"></label>
+
+        <h3>Total amount of followers in the past 30 days</h3>
+        <label id="followerNumber"></label>
+
+        <h3>Top 3 items, best selling in the past 30 days</h3>
+        <label id="top3bestSale"></label>
+
 
         <ul id ="message_list">
 
@@ -32,23 +42,37 @@
 
                             $('#message_list').append('<li color="red">' + record['msg'] + '  ('+ check_read + ", " + record['created_at'] + ')</li>');
                         }
-                        $('#message_list').append('<li>=====================================</li>');
+                        $('#message_list').append('<li>____________________________________________________________________________________________</li>');
 
                         f_last_date = data['last_dates']['f'];
                         s_last_date = data['last_dates']['s'];
                         d_last_date = data['last_dates']['d'];
                         m_last_date = data['last_dates']['m'];
                 });
-
             }
 
-            $(document).ready(function() {
-                
-                $('#btnGetMessage').click(function(){
-                    getMessage();
+            function getSummaryData() {
+                $.get('/revenue').done(function(data){
+                    $('#donation').text(data["donation"]);
+                    $('#merch_sale').text(data["merch_sale"]);
+                    $('#subscriber').text("Tier1) " + data["subscriber"]["1"] + ",  Tier2) " + data["subscriber"]["2"] + ",  Tier3) " + data["subscriber"]["3"])
                 });
 
+                $.get('/followerNumber').done(function(data){
+                    $('#followerNumber').text(data);
+                });
+
+                $.get('/top3bestSale').done(function(data){
+                    for (item of JSON.stringify(data)) {
+                        $('#top3bestSale').append(item);
+                    }
+                });
+            }
+
+
+            $(document).ready(function() {
                 getMessage();
+                getSummaryData();
 
                 $(window).scroll(function(){
                     var scrT = $(window).scrollTop();
@@ -58,6 +82,8 @@
                         getMessage();
                     }         
                 });
+
+            
             });
         </script>
 

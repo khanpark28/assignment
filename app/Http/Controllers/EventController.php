@@ -8,6 +8,84 @@ use Datetime;
 
 class EventController extends Controller
 {
+    private function getPeriod(Request $request) {
+        if ($request->filled('period')) {
+            $period = $request->period;
+        } else {
+            $period = 30;
+        }
+
+        return $period;
+    }
+
+    public function getRevenue(Request $request) {
+        $period = $this->getPeriod($request);
+
+        $query1 = 'select concat(sum(amount), " ", currency) as rev from donations where created_at > now() - interval ' . strval($period) . ' day group by currency';
+        $query2 = 'select concat(sum(count * price), " ", currency) as rev from merch_sales where created_at > now() - interval ' . strval($period) . ' day group by currency';
+        $query3 = 'select sum(amount) as rev, tier 
+                        from 
+                        (
+                            select (case 
+                                    when tier = 1 then 5  
+                                    when tier = 2 then 10
+                                    when tier = 3 then 15
+                                    end
+                                    ) as amount, tier as tier 
+                                    from subscribers where created_at > now() - interval ' . strval($period) . ' day
+
+                        ) as T group by tier';
+
+
+        $revenue_donation = DB::select($query1);
+        $revenue_merch_sale = DB::select($query2);
+        $revenue_subscriber = DB::select($query3);
+
+        $ret = array();
+        $ret['donation'] = ((array)current($revenue_donation))['rev'];
+        $ret['merch_sale'] = ((array)current($revenue_merch_sale))['rev'];
+        $sub = array(
+            ((array)$revenue_subscriber[0])['tier']=>((array)$revenue_subscriber[0])['rev'], 
+            ((array)$revenue_subscriber[1])['tier']=>((array)$revenue_subscriber[1])['rev'],
+            ((array)$revenue_subscriber[2])['tier']=>((array)$revenue_subscriber[2])['rev']
+            );
+
+        $ret['subscriber'] = $sub;
+
+        return $ret;
+    }
+
+    public function getFollowerNumber(Request $request) {
+        $period = $this->getPeriod($request);
+
+        $query = 'select count(*) as cnt from followers where created_at > now() - interval ' . strval($period) . ' day';
+        $count = DB::select($query);
+
+        return ((array)current($count))['cnt'];
+    }
+
+    public function getTop3BestSale(Request $request) {
+        $period = $this->getPeriod($request);
+
+        $query = 'select concat(sum(amt), " ", currency) as amt, item_name 
+                    from (
+                    select price * count as amt, currency, item_name from merch_sales 
+                    where created_at > now() - interval 30 day 
+                    ) as T 
+                    group by item_name, currency
+                    order by 1 desc limit 3';
+
+        $bestSale = DB::select($query);
+
+        $ret = array(
+            ((array)$bestSale[0])['item_name']=>((array)$bestSale[0])['amt'], 
+            ((array)$bestSale[1])['item_name']=>((array)$bestSale[1])['amt'], 
+            ((array)$bestSale[2])['item_name']=>((array)$bestSale[2])['amt'], 
+            );
+
+        return $ret;
+    }
+
     public function getMessage(Request $request) {
         if ($request->filled('record_num')) {
             $r_number = $request->record_num;
